@@ -1479,6 +1479,65 @@
             .result-left { padding: 20px; }
             .stats-grid { grid-template-columns: 1fr 1fr; }
         }
+        /* --- STYLE LIGHTBOX (POPUP FOTO) --- */
+.lightbox-overlay {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 10000; /* Di atas modal komentar */
+    padding-top: 60px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.9); /* Latar belakang hitam transparan */
+}
+
+.lightbox-content {
+    position: relative;
+    background-color: #fefefe;
+    margin: auto;
+    padding: 0;
+    width: 90%;
+    max-width: 1000px;
+    border-radius: 15px;
+    animation: zoom 0.6s;
+}
+
+@keyframes zoom {
+    from {transform:scale(0)} 
+    to {transform:scale(1)}
+}
+
+.lightbox-close {
+    position: absolute;
+    top: 10px;
+    right: 25px;
+    color: #f1f1f1;
+    font-size: 40px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 2;
+}
+.lightbox-close:hover {
+    color: #bbb;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.lightbox-img {
+    width: 100%;
+    height: auto;
+    border-radius: 15px;
+    display: block;
+}
+
+/* Responsif Lightbox */
+@media only screen and (max-width: 700px){
+    .lightbox-content {
+        width: 95%;
+    }
+}
 
     </style>
 </head>
@@ -2371,7 +2430,14 @@ Yuk semangat belajar dan bergerak demi lingkungan yang lebih baik!.</p>
             <p>&copy; 2026 PeduliLingkungan. Dibuat untuk proyek pembelajaran.</p>
         </div>
     </footer>
-
+    <!-- MODAL LIGHTBOX (POPUP FOTO) -->
+<div id="lightboxModal" class="lightbox-overlay" onclick="closeLightbox(event)">
+    <div class="lightbox-content" onclick="event.stopPropagation()">
+        <span class="lightbox-close" onclick="closeLightbox(event)">&times;</span>
+        <img class="lightbox-img" id="lightboxImage" src="" alt="Zoom Image">
+    </div>
+</div>
+    <body>
     <!-- SCRIPT ANIMASI -->
     <script>
         // =========================================
@@ -2567,7 +2633,7 @@ Yuk semangat belajar dan bergerak demi lingkungan yang lebih baik!.</p>
         let autoSlideInterval;
         const slideDelay = 6000; 
 
-        function renderPosts() {
+               function renderPosts() {
             sliderTrack = document.getElementById('sliderTrack');
             const dotsContainer = document.getElementById('sliderDots');
             
@@ -2576,9 +2642,45 @@ Yuk semangat belajar dan bergerak demi lingkungan yang lebih baik!.</p>
             sliderTrack.innerHTML = '';
             dotsContainer.innerHTML = '';
 
+            // --- DATA POSTINGAN SLIDER ---
+            const communityPosts = [
+                {
+                    name: "Budi Santoso",
+                    avatar: "https://i.pravatar.cc/150?u=a042581f4e29026024d",
+                    time: "2 jam yang lalu",
+                    image: "img-beranda/1.jpg",
+                    captionTitle: "Hari ini saya dan komunitas menanam 50 pohon mangrove di pinggir pantai.",
+                    captionBody: "Aksi kecil dampak besar! #EdukatifIndonesia.",
+                    likes: 120,
+                    comments: 45
+                },
+                {
+                    name: "Siti Aminah",
+                    avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704d",
+                    time: "5 jam yang lalu",
+                    image: "img-beranda/unnamed (1).jpg",
+                    captionTitle: "Sorting sampah rumah tangga jadi hobi baru.",
+                    captionBody: "Plastik botol terpisah dari organik. Yuk lakukan hal yang sama!",
+                    likes: 85,
+                    comments: 12
+                },
+                {
+                    name: "Reza Rahardian",
+                    avatar: "https://i.pravatar.cc/150?u=a04258114e29026302d",
+                    time: "1 hari yang lalu",
+                    image: "img-beranda/unnamed.jpg",
+                    captionTitle: "Membersihkan sungai di lingkungan sekitar.",
+                    captionBody: "Airnya jadi lebih jernih sekarang.",
+                    likes: 210,
+                    comments: 67
+                }
+            ];
+
+            // --- RENDER LOOP ---
             communityPosts.forEach((post, index) => {
                 const card = document.createElement('div');
                 card.className = 'post-card';
+                
                 card.innerHTML = `
                     <div class="post-header">
                         <img src="${post.avatar}" alt="${post.name}" class="user-avatar">
@@ -2590,20 +2692,18 @@ Yuk semangat belajar dan bergerak demi lingkungan yang lebih baik!.</p>
                     <img src="${post.image}" alt="Aksi Lingkungan" class="post-image">
                     <p class="post-caption-title">${post.captionTitle}</p>
                     <p class="post-caption-body">${post.captionBody}</p>
+                    
+                    <!-- AREA TOMBOL (HANYA SISAKAN LIKE) -->
                     <div class="post-actions">
                         <button class="action-btn like-btn" data-id="${index}">
                             <i class="fa-regular fa-heart"></i> <span>${post.likes}</span>
                         </button>
-                        <button class="action-btn">
-                            <i class="fa-regular fa-comment"></i> <span>${post.comments}</span>
-                        </button>
-                        <button class="action-btn">
-                            <i class="fa-solid fa-share-nodes"></i> Share
-                        </button>
                     </div>
                 `;
+                
                 sliderTrack.appendChild(card);
 
+                // Render Dots (Titik Navigasi)
                 const dot = document.createElement('div');
                 dot.className = `dot-slider ${index === 0 ? 'active' : ''}`;
                 dot.onclick = () => {
@@ -3048,6 +3148,58 @@ Yuk semangat belajar dan bergerak demi lingkungan yang lebih baik!.</p>
             gradeBadge.style.backgroundColor = colorClass;
             gradeBadge.style.boxShadow = `0 10px 25px ${colorClass}80`; 
         }
+                // ==========================================
+        // LOGIKA ACTIVITY REAL-TIME (SIMULASI)
+        // ==========================================
+        document.addEventListener("DOMContentLoaded", function() {
+            
+            // 1. Mengambil elemen HTML berdasarkan class
+            const liveValues = document.querySelectorAll('.live-val');
+            const livePercs = document.querySelectorAll('.live-perc');
+
+            // 2. Data awal (Sesuai angka awal di HTML Anda)
+            // Index 0: Pengunjung (273)
+            // Index 1: Aksi Hari Ini (89)
+            // Index 2: Pohon Tertanam (300)
+            let stats = [273, 89, 300];
+
+            // 3. Fungsi untuk mengupdate angka secara acak
+            function updateRealTime() {
+                // Memilih salah satu dari 3 item secara acak (0, 1, atau 2)
+                const randomIndex = Math.floor(Math.random() * 3);
+
+                // Menambahkan angka secara acak (antara 1 sampai 5)
+                const increment = Math.floor(Math.random() * 5) + 1;
+                
+                // Update data dalam memori
+                stats[randomIndex] += increment;
+
+                // Update tampilan teks di layar
+                if (liveValues[randomIndex]) {
+                    liveValues[randomIndex].innerText = stats[randomIndex];
+
+                    // Simulasi persentase kenaikan (misal: +5%, +8%)
+                    const randomPerc = "+" + (Math.floor(Math.random() * 10) + 1) + "%";
+                    if (livePercs[randomIndex]) {
+                        livePercs[randomIndex].innerText = randomPerc;
+                    }
+
+                    // --- EFEK VISUAL ---
+                    // Ubah warna angka menjadi hijau sebentar saat berubah
+                    liveValues[randomIndex].style.transition = "color 0.3s ease";
+                    liveValues[randomIndex].style.color = "#059669"; // Warna hijau (sesuai tema)
+                    
+                    // Kembalikan warna ke asli setelah 500 milidetik
+                    setTimeout(() => {
+                        liveValues[randomIndex].style.color = "";
+                    }, 500);
+                }
+            }
+
+            // Jalankan fungsi update setiap 2.5 detik (2500 milidetik)
+            setInterval(updateRealTime, 2500);
+        });
+        
 
     </script>
 
